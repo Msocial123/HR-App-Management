@@ -2,13 +2,18 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { MongoClient, ObjectId } = require('mongodb');
 const path = require('path');
+const mongoose = require('mongoose');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // MongoDB connection URI and DB name
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017';
-const DB_NAME = process.env.DB_NAME || 'hr_system';
+const MONGO_URI = process.env.MONGO_URI ;
+const DB_NAME = process.env.DB_NAME ;
+
+mongoose.connect(`${MONGO_URI}/${DB_NAME}?authSource=admin`)
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '../frontend/public')));
