@@ -1,0 +1,50 @@
+name: Build and Push Docker Image
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Custom image tag (e.g. v1.0.0)"
+        required: false
+        default: "latest"
+
+jobs:
+
+  build-and-push:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository 
+        uses: actions/checkout@v4
+
+      - name: Login to Hub.Docker.com
+        uses: docker/login-action@v3 
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME}}  
+          password: ${{ secrets.DOCKERHUB_PASSWORD}}
+
+      - name: Set Up Docker BuildX 
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set Image Tag
+        id: vars
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "tag=pr-${{ github.event.number }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=latest" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and Push Docker Image 
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: muralisocial123/ust-test-image:${{ steps.vars.outputs.tag }} 
