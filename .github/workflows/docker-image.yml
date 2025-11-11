@@ -1,0 +1,18 @@
+name: NodeJS CI
+
+on:
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Docker image
+      run:  BASE_IMAGE=node:18-alpine 
+            docker build . --file Dockerfile --tag ${BASE_IMAGE}:$(date +%s)
+
